@@ -20,7 +20,6 @@ num = 1
 while (numSum < userNum):
 	if (isPrime(num)):
 		numOfPrimes+=1
-		print(num)
 		numSum += num
 	num += 1
 
