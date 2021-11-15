@@ -11,8 +11,6 @@ def isPrime(num):
 			# print(i)
 			if(num%i==0):
 				return False
-		if (isPrime):
-			return True
 
 for i in range(1, 100):
 	if (isPrime(i)):
