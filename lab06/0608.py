@@ -48,8 +48,9 @@ while (not won and stepsToDeath>0):
 
 	if not getGoalPosition(M):
 		won = True
+	stepsToDeath-=1
 
 if (stepsToDeath == 0):
-	print('You\'re dead, no big surprise.')
+	print('You\'re dead, ain\'t that a surprise?')
 else:
 	print('You won!')
