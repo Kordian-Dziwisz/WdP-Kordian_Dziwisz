@@ -1,4 +1,4 @@
-num = 16
+num = 2
 binNum = []
 while (num != 0):
 	if (num % 2):
