@@ -7,7 +7,7 @@ while (num != 0):
 	else:
 		binNum.append(0)
 		num = num/2
-out = ''
+output = ''
 for i in range(len(binNum)):
-	out+=str(binNum[-i-1])
-print(out)
+	output+=str(binNum[-i-1])
+print(output)
