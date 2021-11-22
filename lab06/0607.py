@@ -1,4 +1,4 @@
-num = 2
+num = 7
 binNum = []
 while (num != 0):
 	if (num % 2):
