@@ -17,7 +17,9 @@ def factorial(n, prevFactors=[]):
 	import math
 	if (isPrime(n)):
 		prevFactors.append(n)
-		return prevFactors
+		tmp = prevFactors
+		prevFactors = []
+		return tmp
 	if (not n % 2):
 		prevFactors.append(2)
 		return factorial(n/2, prevFactors)

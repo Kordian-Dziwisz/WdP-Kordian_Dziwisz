@@ -6,6 +6,6 @@ def tiles(n, k):
 
 print(tiles(1, 2))
 print(tiles(2, 2))
-print(tiles(3, 2))
+print(tiles(3, 6))
 print(tiles(4, 2))
 print(tiles(5, 2))
