@@ -1,83 +1,79 @@
-import pygame
+import pygame as pg
+import classes as game
+import config as conf
+import collisions
 
 
 def main():
-
     # initialize the pygame module
-    pygame.init()
-    displayWidth = 1280
-    displayHeight = 720
+    pg.init()
+
+    # display init
+    screen = pg.display.set_mode((conf.displayWidth, conf.displayHeight))
+    pg.display.set_caption(conf.gameName)
+
     # load and set the logo
-    logo = pygame.image.load("bg.png")
-    pygame.display.set_icon(logo)
-    sprite = pygame.image.load("character.png")
-    sprite.set_alpha(None)
-    sprite.set_colorkey((int('6C', 16), int('74', 16), int('7D', 16)))
-    sprite.set_alpha(120)
-    pygame.display.set_caption("game")
+    logo = pg.image.load(conf.logoPath)
+    pg.display.set_icon(logo)
 
-    screen = pygame.display.set_mode((displayWidth, displayHeight))
+    # load sprites
+    # sprite.set_alpha(None)
+    # sprite.set_colorkey((int('6C', 16), int('74', 16), int('7D', 16)))
+    # sprite.set_alpha(120)
 
-    # define a variable to control the main loop
+    player1 = game.Player(game.Position(0, 0), 100, 50, game.Velocity(
+        0, 0), conf.gravity, pg.image.load(conf.character1SpritePath), game.Controls(pg.K_COMMA, pg.K_e, pg.K_a))
+
+    platforms = []
+    platforms.append(game.Platform(game.Position(400, 600), 50,
+                                   300, pg.image.load(conf.platformsSpritePath)))
+    platforms.append(game.Platform(game.Position(800, 700), 50,
+                                   300, pg.image.load(conf.platformsSpritePath)))
+    platforms.append(game.Platform(game.Position(800, 500), 50,
+                                   300, pg.image.load(conf.platformsSpritePath)))
+    platforms.append(game.Platform(game.Position(400, 400), 50,
+                                   300, pg.image.load(conf.platformsSpritePath)))
+
+    keyPressed = False
+    clock = pg.time.Clock()
     running = True
 
-    xpos = 0
-    ypos = 0
-    # how many pixels we move our smiley each frame
-
-    class Velocity:
-        def __init__(self, x=0, y=0):
-            self.x = x
-            self.y = y
-    player_v = Velocity(0, 0)
-    gravity = 0.1
-    clock = pygame.time.Clock()
-    # main loop
     while running:
-        dt = clock.tick(60)
-        # collision with edges of the screen
-        # pygame.display.flip()
-        screen.fill((255, 120, 120))
-        screen.blit(sprite, (xpos, ypos))
-        pygame.display.flip()
-        isOutside = False
-        if (abs(player_v.y) < 0.1*0.9):
-            player_v.y = 0
-        if (abs(player_v.x) < 0.1*0.9):
-            player_v.x = 0
-        if ypos < displayHeight - 100:
-            player_v.y -= gravity
-        if ypos >= displayHeight-100:
-            player_v.y = abs(player_v.y) * 0.9
-        if ypos <= 0:
-            player_v.y = -abs(player_v.y)*0.9
-        if xpos >= displayWidth - 50:
-            player_v.x = -abs(player_v.x)*0.9
-        if xpos <= 0:
-            player_v.x = abs(player_v.x)*0.9
-        # if ypos < displayHeight - 100 and ypos > 0 and xpos < displayWidth - 50 and xpos > 0 and isOutside:
-        #     isOutside = False
-        ypos += -player_v.y * dt
-        xpos += player_v.x * dt
-        print(ypos)
+        # update screen and objects
+        dt = clock.tick(120)
+        screen.fill((255, 50, 50))
+        # player sprite
+        screen.blit(player1.sprite, (player1.position.x, player1.position.y))
+        # obstacle sprites
+        for platform in platforms:
+            screen.blit(platform.sprite,
+                        (platform.position.x, platform.position.y))
+
+        pg.display.flip()
+        player1.update(dt)
+
+        # collisions
+        grounded = collisions.screenEdges(
+            conf.displayWidth, conf.displayHeight, conf.gravity, conf.bouncyness, player1)
+        collisions.platforms(
+            platforms, player1, grounded
+        )
 
         # event handling, gets Lall event from the event queue
-        for event in pygame.event.get():
+        if keyPressed:
+            if keyPressed[player1.controls.up]:
+                player1.jump()
+            if keyPressed[player1.controls.right]:
+                player1.accelerateRight()
+            if keyPressed[pg.K_a]:
+                player1.accelerateLeft()
+
+        for event in pg.event.get():
+            keyPressed = pg.key.get_pressed()
             # only do something if the event is of type QUIT
-            if event.type == pygame.QUIT:
-                sprite
+            if event.type == pg.QUIT:
                 # change the value to False, to exit the main loop
                 running = False
-            keyPressed = pygame.key.get_pressed()
-            if keyPressed[pygame.K_COMMA]:
-                if (ypos >= displayHeight - 100):
-                    player_v.y += 1
-            if keyPressed[pygame.K_e]:
-                player_v.x += 0.1
-            if keyPressed[pygame.K_o]:
-                player_v.y += -0.1
-            if keyPressed[pygame.K_a]:
-                player_v.x += -0.1
 
 
 # run the main function only if this module is executed as the main script
