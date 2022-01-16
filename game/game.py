@@ -22,20 +22,20 @@ def main():
     # sprite.set_alpha(120)
 
     player1 = game.Player(game.Position(0, 0), 100, 50, game.Velocity(
-        0, 0), conf.gravity, pg.image.load(conf.character1SpritePath).convert(), game.Controls(pg.K_COMMA, pg.K_e, pg.K_a))
+        0, 0), game.Velocity(0.5, 2), conf.gravity, pg.image.load(conf.character1SpritePath).convert(), game.Controls(pg.K_COMMA, pg.K_e, pg.K_a))
     player1.enableLogging = True
     player2 = game.Player(game.Position(conf.displayWidth-100, 0), 100, 50, game.Velocity(
-        0, 0), conf.gravity, pg.image.load(conf.character2SpritePath).convert(), game.Controls(pg.K_c, pg.K_n, pg.K_h))
+        0, 0), game.Velocity(0.5, 2), conf.gravity, pg.image.load(conf.character2SpritePath).convert(), game.Controls(pg.K_c, pg.K_n, pg.K_h))
 
     platforms = []
     platforms.append(game.Platform(game.Position(400, 600), 50,
-                                   300, pg.image.load(conf.platformsSpritePath).convert(), 1))
+                                   300, pg.image.load(conf.platformsSpritePath).convert(), game.Velocity(0.5, 0)))
     platforms.append(game.Platform(game.Position(800, 700), 50,
-                                   300, pg.image.load(conf.platformsSpritePath).convert(), 1))
+                                   300, pg.image.load(conf.platformsSpritePath).convert(), game.Velocity(0.5, 0)))
     platforms.append(game.Platform(game.Position(800, 500), 50,
-                                   300, pg.image.load(conf.platformsSpritePath).convert(), 1))
+                                   300, pg.image.load(conf.platformsSpritePath).convert(), game.Velocity(0.5, 0)))
     platforms.append(game.Platform(game.Position(400, 400), 50,
-                                   300, pg.image.load(conf.platformsSpritePath).convert(), 1))
+                                   300, pg.image.load(conf.platformsSpritePath).convert(), game.Velocity(0.5, 0)))
     platforms[1].isBouncing = False
     platforms[2].isBouncing = True
     platforms[3].isBouncing = False

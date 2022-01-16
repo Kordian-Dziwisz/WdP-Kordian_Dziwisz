@@ -1,3 +1,6 @@
+import config as conf
+
+
 class Position:
     def __init__(self, x, y):
         self.x = x
@@ -17,21 +20,46 @@ class Controls:
         self.left = left
 
 
-class Player:
-    def __init__(self, position, height, width, velocity, gravity, sprite, controls):
+class PhysicalObject:
+    def __init__(self, position, height, width, sprite, velocity, maxVelocity, gravity):
         self.position = position
         self.height = height
         self.width = width
-        self.velocity = velocity
         self.sprite = sprite
-        self.controls = controls
+        self.velocity = velocity
         self.gravity = gravity
-        self.gravityEnabled = True
+        self.maxVelocity = maxVelocity
         self.canGoRight = True
         self.canGoLeft = True
-        self.maxVelocity = Velocity(0.5, 2)
-        self.enableLogging = False
         self.isGrounded = True
+
+    def verifyVelocity(self, ax=0, ay=0):
+        return abs(self.velocity.x)+ax < self.maxVelocity.x and self.velocity.y+ay < self.maxVelocity.y
+
+    def update(self, dt):
+        if (self.verifyVelocity()):
+            self.velocity.y += self.gravity
+        if (self.velocity.x > 0 and self.canGoRight):
+            self.position.x += self.velocity.x * dt
+        if (self.velocity.x < 0 and self.canGoLeft):
+            self.position.x += self.velocity.x * dt
+        # print(self.velocity.x)
+        if self.velocity.x > 0:
+            self.velocity.x -= 0.001 * dt
+            if self.velocity.x < 0:
+                self.velocity.x = 0
+        else:
+            self.velocity.x += 0.001 * dt
+            if self.velocity.x > 0:
+                self.velocity.x = 0
+        self.position.y += self.velocity.y * dt
+
+
+class Player(PhysicalObject):
+    def __init__(self, position, height, width, velocity, maxVelocity, gravity, sprite, controls):
+        super().__init__(
+            position, height, width, sprite, velocity, maxVelocity, gravity)
+        self.controls = controls
         self.jumpHeight = 0.9
 
     def verifyVelocity(self, ax=0, ay=0):
@@ -46,15 +74,13 @@ class Player:
             self.velocity.x += a
 
     def jump(self):
-        if self.gravityEnabled == False:
+        if self.gravity == 0:
             self.velocity.y = -self.jumpHeight
-            self.gravityEnabled = True
+            self.gravity = conf.gravity
 
     def update(self, dt):
         # if (self.enableLogging):
-        #     print(self.gravityEnabled)
-        if (self.gravityEnabled and self.verifyVelocity()):
-
+        if (self.verifyVelocity()):
             self.velocity.y += self.gravity
         if (self.velocity.x > 0 and self.canGoRight):
             self.position.x += self.velocity.x * dt
@@ -73,22 +99,28 @@ class Player:
 
 
 class Platform:
-    def __init__(self, position, height, width, sprite, speed):
+    def __init__(self, position, height, width, sprite, velocity):
         self.position = position
         self.height = height
         self.width = width
         self.sprite = sprite
-        self.speed = speed
+        self.velocity = velocity
         self.isBouncing = False
-        self.isMovingRight = True
 
     def update(self, dt, minX, maxX):
         if (self.isBouncing):
             if (self.position.x < minX):
-                self.isMovingRight = True
+                self.velocity.x = abs(self.velocity.x)
             if (self.position.x+self.width > maxX):
-                self.isMovingRight = False
-            if(self.isMovingRight):
-                self.position.x += self.speed * dt
-            else:
-                self.position.x -= self.speed * dt
+                self.velocity.x = -abs(self.velocity.x)
+            self.position.x += self.velocity.x * dt
+
+
+class Bullet:
+    def __init__(self, position, height, width, sprite, velocity, gravity):
+        self.position = position
+        self.height = height
+        self.width = width
+        self.velocity = velocity
+        self.sprite = sprite
+        self.gravity = gravity

@@ -1,10 +1,13 @@
+import config as conf
+
+
 def screenEdges(width, height, gravity, bouncyness, player):
     player.isGrounded = False
     if player.position.y > height - 100:
         # print('fallen')
         # print(player.position.y)
         player.position.y = height - 100
-        player.gravityEnabled = False
+        player.gravity = 0
         # player.velocity.y = -abs(player.velocity.y) * bouncyness
         player.velocity.y = 0
     # if player.position.y <= 0: BOUNCING FROM TOP OF THE SCREEN
@@ -27,7 +30,7 @@ def platforms(platforms, player):
             if (player.position.y <= platform.position.y + tolerance):
                 if (player.position.y+player.height <= platform.position.y + platform.height + tolerance):
                     player.position.y = platform.position.y - player.height
-                    player.gravityEnabled = False
+                    player.gravity = 0
                     player.velocity.y = 0
                 else:
                     player.position.y = platform.position.y + tolerance
@@ -42,5 +45,5 @@ def platforms(platforms, player):
             return True
     if (not player.isGrounded):
         # print('enabling gravity')
-        player.gravityEnabled = True
+        player.gravity = conf.gravity
     return False
