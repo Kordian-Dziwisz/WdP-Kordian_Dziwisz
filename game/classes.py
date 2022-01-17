@@ -1,4 +1,6 @@
 import config as conf
+import pygame as pg
+import copy
 
 
 class Position:
@@ -21,7 +23,7 @@ class Controls:
 
 
 class PhysicalObject:
-    def __init__(self, position, height, width, sprite, velocity, maxVelocity, gravity):
+    def __init__(self, position, height, width, sprite, velocity, maxVelocity=Velocity(float('inf'), float('inf')), gravity=conf.gravity):
         self.position = position
         self.height = height
         self.width = width
@@ -36,20 +38,19 @@ class PhysicalObject:
     def verifyVelocity(self, ax=0, ay=0):
         return abs(self.velocity.x)+ax < self.maxVelocity.x and self.velocity.y+ay < self.maxVelocity.y
 
-    def update(self, dt):
+    def update(self, dt, friction=0.001):
         if (self.verifyVelocity()):
             self.velocity.y += self.gravity
         if (self.velocity.x > 0 and self.canGoRight):
             self.position.x += self.velocity.x * dt
         if (self.velocity.x < 0 and self.canGoLeft):
             self.position.x += self.velocity.x * dt
-        # print(self.velocity.x)
         if self.velocity.x > 0:
-            self.velocity.x -= 0.001 * dt
+            self.velocity.x -= friction * dt
             if self.velocity.x < 0:
                 self.velocity.x = 0
         else:
-            self.velocity.x += 0.001 * dt
+            self.velocity.x += friction * dt
             if self.velocity.x > 0:
                 self.velocity.x = 0
         self.position.y += self.velocity.y * dt
@@ -78,24 +79,8 @@ class Player(PhysicalObject):
             self.velocity.y = -self.jumpHeight
             self.gravity = conf.gravity
 
-    def update(self, dt):
-        # if (self.enableLogging):
-        if (self.verifyVelocity()):
-            self.velocity.y += self.gravity
-        if (self.velocity.x > 0 and self.canGoRight):
-            self.position.x += self.velocity.x * dt
-        if (self.velocity.x < 0 and self.canGoLeft):
-            self.position.x += self.velocity.x * dt
-        # print(self.velocity.x)
-        if self.velocity.x > 0:
-            self.velocity.x -= 0.001 * dt
-            if self.velocity.x < 0:
-                self.velocity.x = 0
-        else:
-            self.velocity.x += 0.001 * dt
-            if self.velocity.x > 0:
-                self.velocity.x = 0
-        self.position.y += self.velocity.y * dt
+    def shoot(self, velocity, sprite):
+        return Bullet(copy.deepcopy(self.position), 20, 20, sprite, velocity)
 
 
 class Platform:
@@ -116,11 +101,5 @@ class Platform:
             self.position.x += self.velocity.x * dt
 
 
-class Bullet:
-    def __init__(self, position, height, width, sprite, velocity, gravity):
-        self.position = position
-        self.height = height
-        self.width = width
-        self.velocity = velocity
-        self.sprite = sprite
-        self.gravity = gravity
+class Bullet(PhysicalObject):
+    pass

@@ -17,10 +17,12 @@ def main():
     pg.display.set_icon(logo)
 
     # load sprites
-    # sprite.set_alpha(None)
-    # sprite.set_colorkey((int('6C', 16), int('74', 16), int('7D', 16)))
-    # sprite.set_alpha(120)
+    bulletSprite = pg.image.load(
+        conf.bulletSpritePath).convert()
+    bulletSprite.set_colorkey((255, 255, 255))
+    bulletSprite = pg.transform.scale(bulletSprite, (20, 20))
 
+    # main game objects init
     player1 = game.Player(game.Position(0, 0), 100, 50, game.Velocity(
         0, 0), game.Velocity(0.5, 2), conf.gravity, pg.image.load(conf.character1SpritePath).convert(), game.Controls(pg.K_COMMA, pg.K_e, pg.K_a))
     player1.enableLogging = True
@@ -40,14 +42,12 @@ def main():
     platforms[2].isBouncing = True
     platforms[3].isBouncing = False
 
+    bullets = []
+
     keyPressed = False
     clock = pg.time.Clock()
     running = True
 
-    bulletSprite = pg.image.load(
-        conf.bulletSpritePath).convert()
-    bulletSprite.set_colorkey((255, 255, 255))
-    bulletSprite = pg.transform.scale(bulletSprite, (20, 20))
     while running:
         # update screen and objects
         dt = clock.tick(60)
@@ -55,17 +55,20 @@ def main():
         # player sprite
         screen.blit(player1.sprite, (player1.position.x, player1.position.y))
         screen.blit(player2.sprite, (player2.position.x, player2.position.y))
-        screen.blit(bulletSprite, (500, 200))
         # obstacle sprites
         for platform in platforms:
             screen.blit(platform.sprite,
                         (platform.position.x, platform.position.y))
+        for bullet in bullets:
+            screen.blit(bullet.sprite, (bullet.position.x, bullet.position.y))
 
-        pg.display.flip()
         player1.update(dt)
         player2.update(dt)
         for platform in platforms:
             platform.update(dt, 0, conf.displayWidth)
+        for bullet in bullets:
+            bullet.update(dt)
+        pg.display.flip()
 
         # collisions
         collisions.screenEdges(
