@@ -44,14 +44,16 @@ def platforms(platforms, player):
                     player.position.x = platform.position.x + platform.width
             return True
     if (not player.isGrounded):
-        # print('enabling gravity')
         player.gravity = conf.gravity
     return False
 
 
-def bullets(bullets, screenWidth=conf.displayWidth, screenHeight=conf.displayHeight, player=None, platforms=[]):
+def bullets(bullets, screenWidth=conf.displayWidth, screenHeight=conf.displayHeight, players=[], platforms=[]):
     for bullet in bullets:
+        # edges of the screen collision
         if bullet.position.y > screenHeight - bullet.height or bullet.position.y < 0 or bullet.position.x > screenWidth - bullet.width or bullet.position.x < 0:
-            # print('outofboundaries')
-            print(bullet)
             bullets.remove(bullet)
+        # player collisions
+        for player in players:
+            if bullet.position.y > player.position.y - bullet.height and bullet.position.y < player.position.y + player.height and bullet.position.x > player.position.x - bullet.width and bullet.position.x < player.position.x + player.width and bullet.owner is not player:
+                player.takeDamage(bullet.damage)

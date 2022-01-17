@@ -28,6 +28,7 @@ def main():
     player1.enableLogging = True
     player2 = game.Player(game.Position(conf.displayWidth-100, 0), 100, 50, game.Velocity(
         0, 0), game.Velocity(0.5, 2), conf.gravity, pg.image.load(conf.character2SpritePath).convert(), game.Controls(pg.K_c, pg.K_n, pg.K_h, pg.K_t))
+    players = [player1, player2]
 
     platforms = []
     platforms.append(game.Platform(game.Position(400, 600), 50,
@@ -38,9 +39,7 @@ def main():
                                    300, pg.image.load(conf.platformsSpritePath).convert(), game.Velocity(0.5, 0)))
     platforms.append(game.Platform(game.Position(400, 400), 50,
                                    300, pg.image.load(conf.platformsSpritePath).convert(), game.Velocity(0.5, 0)))
-    platforms[1].isBouncing = False
     platforms[2].isBouncing = True
-    platforms[3].isBouncing = False
 
     bullets = []
 
@@ -49,21 +48,23 @@ def main():
     running = True
 
     while running:
-        # update screen and objects
+        # clock
         dt = clock.tick(60)
         screen.fill((255, 50, 50))
-        # player sprite
-        screen.blit(player1.sprite, (player1.position.x, player1.position.y))
-        screen.blit(player2.sprite, (player2.position.x, player2.position.y))
-        # obstacle sprites
+
+        # sprites updates
+        for player in players:
+            screen.blit(player.sprite,
+                        (player.position.x, player.position.y))
         for platform in platforms:
             screen.blit(platform.sprite,
                         (platform.position.x, platform.position.y))
         for bullet in bullets:
             screen.blit(bullet.sprite, (bullet.position.x, bullet.position.y))
 
-        player1.update(dt)
-        player2.update(dt)
+        # object updates
+        for player in players:
+            player.update(dt)
         for platform in platforms:
             platform.update(dt, 0, conf.displayWidth)
         for bullet in bullets:
@@ -79,32 +80,28 @@ def main():
         collisions.platforms(
             platforms, player2
         )
-        collisions.bullets(bullets)
+        collisions.bullets(bullets, players=players)
+
+        # player deaths
+        for player in players:
+            if player.dead:
+                players.remove(player)
+                running = False
 
         # event handling, gets Lall event from the event queue
         if keyPressed:
-            if keyPressed[player1.controls.right]:
-                player1.accelerateRight()
-            if keyPressed[player1.controls.left]:
-                player1.accelerateLeft()
-            if keyPressed[player1.controls.up]:
-                player1.jump()
-            if keyPressed[player1.controls.shoot]:
-                bullet = player1.shoot(
-                    game.Velocity(1, 0), bulletSprite)
-                if(bullet):
-                    bullets.append(bullet)
-            if keyPressed[player2.controls.right]:
-                player2.accelerateRight()
-            if keyPressed[player2.controls.left]:
-                player2.accelerateLeft()
-            if keyPressed[player2.controls.up]:
-                player2.jump()
-            if keyPressed[player2.controls.shoot]:
-                bullet = player2.shoot(
-                    game.Velocity(1, 0), bulletSprite)
-                if(bullet):
-                    bullets.append(bullet)
+            for player in players:
+                if keyPressed[player.controls.right]:
+                    player.accelerateRight()
+                if keyPressed[player.controls.left]:
+                    player.accelerateLeft()
+                if keyPressed[player.controls.up]:
+                    player.jump()
+                if keyPressed[player.controls.shoot]:
+                    bullet = player.shoot(
+                        game.Velocity(1, 0), bulletSprite)
+                    if(bullet):
+                        bullets.append(bullet)
 
         for event in pg.event.get():
             # only do something if the event is of type QUIT

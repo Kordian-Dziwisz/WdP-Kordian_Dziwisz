@@ -3,18 +3,22 @@ import pygame as pg
 import copy
 import asyncio
 import time
+import math
 
 
 class Position:
-    def __init__(self, x, y):
+    def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
 
 
 class Velocity:
-    def __init__(self, x, y):
+    def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
+
+    def __neg__(self):
+        return Velocity(-self.x, -self.y)
 
 
 class Controls:
@@ -26,20 +30,20 @@ class Controls:
 
 
 class PhysicalObject:
-    def __init__(self, position, height, width, sprite, velocity, maxVelocity=Velocity(float('inf'), float('inf')), gravity=conf.gravity):
+    def __init__(self, position, height, width, sprite, velocity=Velocity(0, 0), maxVelocity=Velocity(math.inf, math.inf), gravity=conf.gravity):
         self.position = position
         self.height = height
         self.width = width
         self.sprite = sprite
         self.velocity = velocity
-        self.gravity = gravity
         self.maxVelocity = maxVelocity
+        self.gravity = gravity
         self.canGoRight = True
         self.canGoLeft = True
         self.isGrounded = True
 
-    def verifyVelocity(self, ax=0, ay=0):
-        return abs(self.velocity.x)+ax < self.maxVelocity.x and self.velocity.y+ay < self.maxVelocity.y
+    def verifyVelocity(self, a=Velocity(0, 0)):
+        return abs(self.velocity.x)+a.x < self.maxVelocity.x and self.velocity.y+a.y < self.maxVelocity.y
 
     def update(self, dt, friction=0.001):
         if (self.verifyVelocity()):
@@ -60,24 +64,28 @@ class PhysicalObject:
 
 
 class Player(PhysicalObject):
-    def __init__(self, position, height, width, velocity, maxVelocity, gravity, sprite, controls):
+    def __init__(self, position, height, width, velocity, maxVelocity, gravity, sprite, controls, health=1):
         super().__init__(
             position, height, width, sprite, velocity, maxVelocity, gravity)
         self.controls = controls
         self.jumpHeight = 0.9
         self.reloaded = True
         self.reloadDuration = 0.5
-
-    def verifyVelocity(self, ax=0, ay=0):
-        return abs(self.velocity.x)+ax < self.maxVelocity.x and self.velocity.y+ay < self.maxVelocity.y
+        self.health = health
+        self.dead = False
+        self.isTurnedRight = True
 
     def accelerateRight(self, a=0.05):
-        if(self.verifyVelocity(0.05, 0)):
+        if(self.verifyVelocity(Velocity(a, 0))):
             self.velocity.x += a
+            if self.velocity.x > 0:
+                self.isTurnedRight = True
 
     def accelerateLeft(self, a=-0.05):
-        if(self.verifyVelocity(0.05, 0)):
+        if(self.verifyVelocity(Velocity(a, 0))):
             self.velocity.x += a
+            if self.velocity.x < 0:
+                self.isTurnedRight = False
 
     def jump(self):
         if self.gravity == 0:
@@ -94,9 +102,17 @@ class Player(PhysicalObject):
             self.reloaded = False
             loop = asyncio.get_event_loop()
             future1 = loop.run_in_executor(None, self.reload)
-            return Bullet(copy.deepcopy(self.position), 20, 20, sprite, velocity, gravity=0)
+            return Bullet(copy.deepcopy(self.position), 20, 20, sprite, self, velocity, gravity=0) if self.isTurnedRight else Bullet(copy.deepcopy(self.position), 20, 20, sprite, self, -velocity, gravity=0)
         else:
             return False
+
+    def takeDamage(self, damage):
+        self.health -= damage
+        if self.health <= 0:
+            self.die()
+
+    def die(self):
+        self.dead = True
 
 
 class Platform:
@@ -118,7 +134,7 @@ class Platform:
 
 
 class Bullet(PhysicalObject):
-    pass
-    # def update(self,):
-    #     super().update(dt)
-    #     print(self.position.x)
+    def __init__(self, position, height, width, sprite, owner, velocity=Velocity(1, 0), maxVelocity=Velocity(math.inf, math.inf), gravity=0, damage=1):
+        super().__init__(position, height, width, sprite, velocity, maxVelocity, gravity)
+        self.owner = owner
+        self.damage = damage
