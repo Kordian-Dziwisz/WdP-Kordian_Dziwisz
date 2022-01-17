@@ -43,10 +43,10 @@ class PhysicalObject:
         self.isGrounded = True
 
     def verifyVelocity(self, a=Velocity(0, 0)):
-        return abs(self.velocity.x)+a.x < self.maxVelocity.x and self.velocity.y+a.y < self.maxVelocity.y
+        return abs(self.velocity.x+a.x) < self.maxVelocity.x and self.velocity.y+a.y < self.maxVelocity.y
 
     def update(self, dt, friction=0.001):
-        if (self.verifyVelocity()):
+        if (self.verifyVelocity(Velocity(0, self.gravity))):
             self.velocity.y += self.gravity
         if (self.velocity.x > 0 and self.canGoRight):
             self.position.x += self.velocity.x * dt
