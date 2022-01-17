@@ -24,10 +24,10 @@ def main():
 
     # main game objects init
     player1 = game.Player(game.Position(0, 0), 100, 50, game.Velocity(
-        0, 0), game.Velocity(0.5, 2), conf.gravity, pg.image.load(conf.character1SpritePath).convert(), game.Controls(pg.K_COMMA, pg.K_e, pg.K_a))
+        0, 0), game.Velocity(0.5, 2), conf.gravity, pg.image.load(conf.character1SpritePath).convert(), game.Controls(pg.K_COMMA, pg.K_e, pg.K_a, pg.K_o))
     player1.enableLogging = True
     player2 = game.Player(game.Position(conf.displayWidth-100, 0), 100, 50, game.Velocity(
-        0, 0), game.Velocity(0.5, 2), conf.gravity, pg.image.load(conf.character2SpritePath).convert(), game.Controls(pg.K_c, pg.K_n, pg.K_h))
+        0, 0), game.Velocity(0.5, 2), conf.gravity, pg.image.load(conf.character2SpritePath).convert(), game.Controls(pg.K_c, pg.K_n, pg.K_h, pg.K_t))
 
     platforms = []
     platforms.append(game.Platform(game.Position(400, 600), 50,
@@ -67,22 +67,20 @@ def main():
         for platform in platforms:
             platform.update(dt, 0, conf.displayWidth)
         for bullet in bullets:
-            bullet.update(dt)
+            bullet.update(dt, 0)
         pg.display.flip()
 
         # collisions
-        collisions.screenEdges(
-            conf.displayWidth, conf.displayHeight, conf.gravity, conf.bouncyness, player1)
-        collisions.screenEdges(
-            conf.displayWidth, conf.displayHeight, conf.gravity, conf.bouncyness, player2)
+        collisions.screenEdges(player1)
+        collisions.screenEdges(player2)
         collisions.platforms(
             platforms, player1
         )
         collisions.platforms(
             platforms, player2
         )
+        collisions.bullets(bullets)
 
-        # test scaling
         # event handling, gets Lall event from the event queue
         if keyPressed:
             if keyPressed[player1.controls.right]:
@@ -91,12 +89,22 @@ def main():
                 player1.accelerateLeft()
             if keyPressed[player1.controls.up]:
                 player1.jump()
+            if keyPressed[player1.controls.shoot]:
+                bullet = player1.shoot(
+                    game.Velocity(1, 0), bulletSprite)
+                if(bullet):
+                    bullets.append(bullet)
             if keyPressed[player2.controls.right]:
                 player2.accelerateRight()
             if keyPressed[player2.controls.left]:
                 player2.accelerateLeft()
             if keyPressed[player2.controls.up]:
                 player2.jump()
+            if keyPressed[player2.controls.shoot]:
+                bullet = player2.shoot(
+                    game.Velocity(1, 0), bulletSprite)
+                if(bullet):
+                    bullets.append(bullet)
 
         for event in pg.event.get():
             # only do something if the event is of type QUIT
@@ -104,7 +112,6 @@ def main():
             if event.type == pg.QUIT:
                 # change the value to False, to exit the main loop
                 running = False
-
 
                 # run the main function only if this module is executed as the main script
                 # (if you import this as a module then nothing is executed)

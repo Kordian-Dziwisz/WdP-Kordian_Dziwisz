@@ -1,6 +1,8 @@
 import config as conf
 import pygame as pg
 import copy
+import asyncio
+import time
 
 
 class Position:
@@ -16,10 +18,11 @@ class Velocity:
 
 
 class Controls:
-    def __init__(self, up, right, left):
+    def __init__(self, up, right, left, shoot):
         self.up = up
         self.right = right
         self.left = left
+        self.shoot = shoot
 
 
 class PhysicalObject:
@@ -62,6 +65,8 @@ class Player(PhysicalObject):
             position, height, width, sprite, velocity, maxVelocity, gravity)
         self.controls = controls
         self.jumpHeight = 0.9
+        self.reloaded = True
+        self.reloadDuration = 0.5
 
     def verifyVelocity(self, ax=0, ay=0):
         return abs(self.velocity.x)+ax < self.maxVelocity.x and self.velocity.y+ay < self.maxVelocity.y
@@ -79,8 +84,19 @@ class Player(PhysicalObject):
             self.velocity.y = -self.jumpHeight
             self.gravity = conf.gravity
 
+    def reload(self):
+        time.sleep(self.reloadDuration)
+        self.reloaded = True
+        return True
+
     def shoot(self, velocity, sprite):
-        return Bullet(copy.deepcopy(self.position), 20, 20, sprite, velocity)
+        if (self.reloaded):
+            self.reloaded = False
+            loop = asyncio.get_event_loop()
+            future1 = loop.run_in_executor(None, self.reload)
+            return Bullet(copy.deepcopy(self.position), 20, 20, sprite, velocity, gravity=0)
+        else:
+            return False
 
 
 class Platform:
@@ -103,3 +119,6 @@ class Platform:
 
 class Bullet(PhysicalObject):
     pass
+    # def update(self,):
+    #     super().update(dt)
+    #     print(self.position.x)

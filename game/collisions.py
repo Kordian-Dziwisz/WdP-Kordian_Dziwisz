@@ -1,20 +1,20 @@
 import config as conf
 
 
-def screenEdges(width, height, gravity, bouncyness, player):
+def screenEdges(player, screenWidth=conf.displayWidth, screenHeight=conf.displayHeight, gravity=conf.gravity, bouncyness=conf.bouncyness):
     player.isGrounded = False
-    if player.position.y > height - 100:
+    if player.position.y > screenHeight - 100:
         # print('fallen')
         # print(player.position.y)
-        player.position.y = height - 100
+        player.position.y = screenHeight - 100
         player.gravity = 0
         # player.velocity.y = -abs(player.velocity.y) * bouncyness
         player.velocity.y = 0
     # if player.position.y <= 0: BOUNCING FROM TOP OF THE SCREEN
     #     player.velocity.y = -abs(player.velocity.y)*bouncyness
         player.isGrounded = True
-    if player.position.x > width - 50:
-        player.position.x = width - 50
+    if player.position.x > screenWidth - 50:
+        player.position.x = screenWidth - 50
         player.velocity.x = -abs(player.velocity.x)*bouncyness
     if player.position.x < 0:
         player.position.x = 0
@@ -47,3 +47,11 @@ def platforms(platforms, player):
         # print('enabling gravity')
         player.gravity = conf.gravity
     return False
+
+
+def bullets(bullets, screenWidth=conf.displayWidth, screenHeight=conf.displayHeight, player=None, platforms=[]):
+    for bullet in bullets:
+        if bullet.position.y > screenHeight - bullet.height or bullet.position.y < 0 or bullet.position.x > screenWidth - bullet.width or bullet.position.x < 0:
+            # print('outofboundaries')
+            print(bullet)
+            bullets.remove(bullet)
