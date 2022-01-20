@@ -11,6 +11,18 @@ class Position:
         self.x = x
         self.y = y
 
+    def toTuple(self):
+        return (self.x, self.y)
+
+
+class Size:
+    def __init__(self, width=0, height=0):
+        self.width = width
+        self.height = height
+
+    def toTuple(self):
+        return (self.width, self.height)
+
 
 class Velocity:
     def __init__(self, x=0, y=0):
@@ -27,6 +39,37 @@ class Controls:
         self.right = right
         self.left = left
         self.shoot = shoot
+
+
+class UIElementGroup:
+    def __init__(self, texts=False, rects=False):
+        if not texts:
+            self.texts = {}
+        if not rects:
+            self.rects = {}
+        # self.texts = texts
+        # self.rects = rects
+
+
+class UITextBox:
+    def __init__(self, pg, font='Roboto', size=30, text='', position=Position(), color=(0, 0, 0)):
+        self.font = pg.font.SysFont(font, size)
+        self.surface = self.font.render(text, False, color)
+        self.text = text
+        self.position = position
+        self.hidden = False
+
+
+class UIRect:
+    def __init__(self, pg, position=Position(), size=Size()):
+        pass
+        rect = pg.Rect(position.toTuple(), size.toTuple())
+        self.surface = pg.Surface(size.toTuple())
+        pg.draw.rect(
+            self.surface, (255, 255, 255), rect)
+        self.position = position
+        self.size = size
+        self.hidden = False
 
 
 class PhysicalObject:
