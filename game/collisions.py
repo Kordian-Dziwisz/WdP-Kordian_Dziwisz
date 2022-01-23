@@ -57,3 +57,4 @@ def bullets(bullets, screenWidth=conf.displayWidth, screenHeight=conf.displayHei
         for player in players:
             if bullet.position.y > player.position.y - bullet.height and bullet.position.y < player.position.y + player.height and bullet.position.x > player.position.x - bullet.width and bullet.position.x < player.position.x + player.width and bullet.owner is not player:
                 player.takeDamage(bullet.damage)
+                bullets.remove(bullet)

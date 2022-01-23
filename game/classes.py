@@ -52,24 +52,35 @@ class UIElementGroup:
 
 
 class UITextBox:
-    def __init__(self, pg, font='Roboto', size=30, text='', position=Position(), color=(0, 0, 0)):
+    def __init__(self, pg, font='Roboto', size=30, text='', position=Position(), color=(0, 0, 0), playerRef=None):
         self.font = pg.font.SysFont(font, size)
         self.surface = self.font.render(text, False, color)
+        self.color = color
         self.text = text
         self.position = position
         self.hidden = False
+        self.playerRef = playerRef
+
+    def update(self, text):
+        self.text = text
+        self.surface = self.font.render(self.text, False, self.color)
 
 
 class UIRect:
-    def __init__(self, pg, position=Position(), size=Size()):
-        pass
-        rect = pg.Rect(position.toTuple(), size.toTuple())
+    def __init__(self, pg, position=Position(), size=Size(), color=False):
+        self.pg = pg
+        if not color:
+            color = (255, 255, 255)
+        self.rect = pg.Rect(position.toTuple(), size.toTuple())
         self.surface = pg.Surface(size.toTuple())
         pg.draw.rect(
-            self.surface, (255, 255, 255), rect)
+            self.surface, color, self.rect)
         self.position = position
         self.size = size
         self.hidden = False
+
+    def changeColor(self, color=(255, 255, 255)):
+        self.pg.draw.rect(self.surface, color, self.rect)
 
 
 class PhysicalObject:
@@ -107,7 +118,7 @@ class PhysicalObject:
 
 
 class Player(PhysicalObject):
-    def __init__(self, position, height, width, velocity, maxVelocity, gravity, sprite, controls, health=1):
+    def __init__(self, position, height, width, velocity, maxVelocity, gravity, sprite, controls, health=1, name=''):
         super().__init__(
             position, height, width, sprite, velocity, maxVelocity, gravity)
         self.controls = controls
@@ -115,6 +126,7 @@ class Player(PhysicalObject):
         self.reloaded = True
         self.reloadDuration = 0.5
         self.health = health
+        self.name = name
         self.dead = False
         self.isTurnedRight = True
 
